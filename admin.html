@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CLOVYN Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head>
+<body style="font-family:system-ui,sans-serif;padding:20px;max-width:1000px;margin:auto">
+<a href="index.html">← Back to CLOVYN</a><h2>CLOVYN Admin – who logged in</h2><div id="out">Loading…</div>
+<script src="db.js"></script>
+<script>
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';'),fd=t=>t?new Date(t).toLocaleString():'—';
+(async()=>{
+  const p=await myProfile(), out=document.getElementById('out');
+  if(!p||!p.is_admin){out.textContent='Admins only. Log in on the main site with your admin account first.';return}
+  const {data,error}=await sb.from('profiles').select('*').order('last_login',{ascending:false,nullsFirst:false});
+  if(error){out.textContent='Error: '+error.message;return}
+  out.innerHTML=`<p><b>${data.length}</b> users</p><div style="overflow-x:auto"><table border="1" cellpadding="6" style="border-collapse:collapse;width:100%"><tr><th>Name</th><th>Email</th><th>Logins</th><th>Joined</th><th>Last login</th><th>Admin</th></tr>`+
+  data.map(u=>`<tr><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td>${u.login_count||0}</td><td>${fd(u.created_at)}</td><td>${fd(u.last_login)}</td><td>${u.is_admin?'yes':''}</td></tr>`).join('')+'</table></div>';
+})();
+</script></body></html>
